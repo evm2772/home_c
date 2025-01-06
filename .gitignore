@@ -2,6 +2,7 @@
 *.o
 *.out
 *.txt
+*.csv
 Temp/
 .vscode
 .idea
