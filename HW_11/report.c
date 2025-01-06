@@ -2,7 +2,7 @@
 #include "sensor.h"
 #include "temp_api.h"
 
-#define DATA_SIZE 20
+#define DATA_SIZE 5
 
 int main()
 {
