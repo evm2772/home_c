@@ -72,9 +72,9 @@ void operate( Stack_t *stack, char c)
         break;              
     }
 }
-_Bool isDigit(char c) // проверяем является ли символ цифрой
+_Bool isDigit(char c) 
 {
-    return (( c>='0' ) && (c <= '9'));
+    return (( c >= '0' ) && (c <= '9'));
 }   
 
 _Bool isOperator(char c) {
