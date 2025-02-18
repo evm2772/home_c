@@ -7,7 +7,7 @@
 #include <unistd.h>
 
 #define MIN_Y  2
-enum {LEFT=1, UP, RIGHT, DOWN, STOP_GAME=KEY_F(10)};
+enum {LEFT=1, UP, RIGHT, DOWN, STOP_GAME=KEY_F(9)};
 enum {MAX_TAIL_SIZE=100, START_TAIL_SIZE=30, MAX_FOOD_SIZE=20, FOOD_EXPIRE_SECONDS=10};
 
 
@@ -155,6 +155,7 @@ void goTail(struct snake_t *head)
 
 int main()
 {
+    double DELAY = 0.1;
     snake_t* snake = (snake_t*)malloc(sizeof(snake_t));
     initSnake(snake,START_TAIL_SIZE,10,10);
     initscr();
@@ -162,11 +163,12 @@ int main()
     raw();                // Откдючаем line buffering
     noecho();            // Отключаем echo() режим при вызове getch
     curs_set(FALSE);    //Отключаем курсор
-    mvprintw(0, 0,"Use arrows for control. Press 'F10' for EXIT");
+    mvprintw(0, 0,"Use arrows for control. Press 'F9' for EXIT");
     timeout(0);    //Отключаем таймаут после нажатия клавиши в цикле
     int key_pressed=0;
     while( key_pressed != STOP_GAME )
     {
+        clock_t begin = clock();
         key_pressed = getch(); // Считываем клавишу
         go(snake);
         goTail(snake);
@@ -176,13 +178,13 @@ int main()
         {
             break;
         }
-
-        timeout(100); // Задержка при отрисовке
+        while((double)(clock() - begin)/CLOCKS_PER_SEC < DELAY)
+        //timeout(100); // Задержка при отрисовке
         changeDirection(snake, key_pressed);
     }
     free(snake->tail);
     free(snake);
-    mvprintw(0, 0," ========== Epic fail! Game over! Press 'F10' for EXIT =========== ");
+    mvprintw(0, 0," ========== Epic fail! Game over! Press 'F9' for EXIT =========== ");
     while( key_pressed != STOP_GAME ) key_pressed = getch();
     endwin(); // Завершаем режим curses mod
     return 0;
