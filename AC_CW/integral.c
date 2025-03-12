@@ -128,8 +128,6 @@ int main(int argc, char *argv[])
     
     int opt = 0, calc_roots=0;
     double epsilon = 0.00001;
-    char cvs_path[256];
-    int h = 0;
     // Parse options
     while ((opt = getopt(argc, argv,"htre:")) != -1)
     {
@@ -156,8 +154,6 @@ int main(int argc, char *argv[])
         }
     };
 
-    // test();
-    double sigma;
     double a;
     double b;
     double x_l, y_l, x_r, y_r, x_t, y_t, x_b, y_b;

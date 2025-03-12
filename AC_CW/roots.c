@@ -1,3 +1,5 @@
+#include <math.h>
+#include <stdio.h>
 #include "roots.h"
 
 int  sign_f(double x, double (*f)(double))
