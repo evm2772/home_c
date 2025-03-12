@@ -2,8 +2,9 @@
 #include <math.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include "roots.h"
 
-
+/*
 int  sign_f(double x, double (*f)(double))
 {
     return f(x) == 0 ? 0 : (f(x) < 0 ? -1: +1);
@@ -22,10 +23,10 @@ double root(double (*f)(double), double xl, double xr, double eps)
         else
             xl = xm;
     }
-    printf("\nSteps number: %d\n", stepcount);
+    printf("\nSteps number: %d", stepcount);
     return (xl + xr) / 2;
 }
-
+*/
 // Trapezoidal Rule function
 double trapezoidal_rule(double (*func)(double), double a, double b, int n) {
     double h = (b - a) / n; // Step size
