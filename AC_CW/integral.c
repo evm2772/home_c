@@ -1,19 +1,7 @@
 #include <stdio.h>
 #include <math.h>
-
-
-double root222(double (*func)(double), double a, double b, double eps)
- {
-    int stepcount = 0; 
-    while(fabs(b - a) > eps) {
-        a = b - (b - a) * func(b) / (func(b) - func(a));
-        b = a - (a - b) * func(a) / (func(a) - func(b));
-        printf("\na: %10lf b: %10lf", a, b);
-        stepcount++;
-    }
-    printf("\nRoot found for %d steps\n", stepcount);
-    return b;
-}
+#include <stdlib.h>
+#include <unistd.h>
 
 
 int  sign_f(double x, double (*f)(double))
@@ -21,26 +9,22 @@ int  sign_f(double x, double (*f)(double))
     return f(x) == 0 ? 0 : (f(x) < 0 ? -1: +1);
 }
 
-
 double root(double (*f)(double), double xl, double xr, double eps) 
 {
-    int stepcount = 0; //число шагов
+    int stepcount = 0;
     double xm;
-    while(fabs(xr-xl) > eps) 
-    { //вещественный модуль разницы или floatabs
+    while(fabs(xr - xl) > eps) 
+    { 
         stepcount++;
-        xm=(xl + xr)/2; // середина отрезка
-        if(sign_f(xl, f) != sign_f(xm, f)) //если знак отличается
+        xm=(xl + xr)/2; 
+        if(sign_f(xl, f) != sign_f(xm, f))
             xr = xm;
         else
             xl = xm;
     }
-    printf("\nFound root for %d steps\n", stepcount); //статистика
+    printf("\nSteps number: %d\n", stepcount);
     return (xl + xr) / 2;
-
 }
-
-
 
 // Trapezoidal Rule function
 double trapezoidal_rule(double (*func)(double), double a, double b, int n) {
@@ -60,7 +44,6 @@ double integral(double (*func)(double), double a, double b, double eps2) {
     double prev_integral = trapezoidal_rule(func, a, b, n);
     double current_integral;
     while (1) {
-        //printf("..%d", n);
         n *= 2; // Double the number of intervals for better accuracy
         current_integral = trapezoidal_rule(func, a, b, n);
 
@@ -75,21 +58,6 @@ double integral(double (*func)(double), double a, double b, double eps2) {
     return current_integral;
 }
 
-/*
-float rootFindTangent(float xn, float eps, function f, function df ) {
-    float x1  = xn - f(xn)/df(xn);
-    float x0 = xn;
-    while(fabs(x0-x1) > eps) {
-       x0 = x1;
-       x1 = x1 - f(x1)/df(x1);
-    }
-    return x1;
- }
- */
-
-
-//=======================================
-// Define the function to integrate
 double f(double x) {
     return sin(x); // Example: integral of sin(x)
 }
@@ -100,39 +68,35 @@ double f_true(double a, double b) {
 }
 
 
-double f1(double x)
+double f1(double x) // 1-st function
 {
     return 0.6 * x + 3.;
 }
 
-double f2(double x)
+double f2(double x) // 2-nd function
 {
     return pow ((x - 2.), 3) - 1;
 }
 
-double f3(double x)
+double f3(double x) // 3-d function
 {
     return 3. / x;
 }
 
-double intersect_f2_f3(double x)
+double intersect_f2_f3(double x) // function for culculating f2 and f3 intersection 
 {
     return f2(x) - f3(x);
 }
 
 
-double intersect_f1_f3(double x)
+double intersect_f1_f3(double x) // function for culculating f1 and f3 intersection 
 {
     return f1(x) - f3(x);
 }
 
-
-
-
-double test_sin(double x)
+double test_sin(double x) // Test function 
 {
     return sin(x);
-    //return x*x - x;
 }
 
 void test()
@@ -141,77 +105,109 @@ void test()
     double a = 0.1;
     double b = 5.0;
     double epsilon = 0.0001;
-    printf("\nRoots sin(x)");
-
+    printf("\nTesting f(x) = sin(x)");
+    printf("\nTest 1: Roots for sin(x) = 0\n");
     x0 = root(test_sin, a, b, epsilon); 
-    printf("Root sin [%3lf; %3lf] ~ %lf", a, b, x0); 
-
+    printf("Root sin(x) in range [%3lf; %3lf] = %lf\n", a, b, x0); 
     a = 0.;
     b = M_PI;
-
+    printf("\nTest 2: Integral for sin(x) = 0\n");
     sigma = integral(test_sin, a, b, epsilon); 
-    printf("\nIntegral sin [%3lf; %3lf] ~ %lf", a, b, sigma); 
-    
+    printf("Integral sin(x) in range [%3lf; %3lf] = %lf\n", a, b, sigma); 
 }
 
 
+void help()
+{
+    printf ("Help ....\n");
+}
 
-int main() {
-    test();
-    double x0, sigma;
+int main(int argc, char *argv[])
+ {
+    
+    int opt = 0, calc_roots=0;
+    double epsilon = 0.00001;
+    char cvs_path[256];
+    int h = 0;
+    // Parse options
+    while ((opt = getopt(argc, argv,"htre:")) != -1)
+    {
+        switch (opt)
+        {
+            case 'h':
+                // Help 
+                help();
+                return 0;
+            case 't':
+                // Testing  
+                test();
+                return 0;
+            case 'r':
+                // Roots
+                calc_roots = 1;
+                break;
+            case 'e':
+                epsilon = (double)atof(optarg);
+                break;
+            case '?': 
+                printf("\nUnknown option!");
+                return 1;
+        }
+    };
+
+    // test();
+    double sigma;
     double a;
     double b;
-    double epsilon = 0.00001;
- 
-
-    // f2 and f3 inresection:
-    // 2 roots in [-5, 0.0001] and [2; 6]
-    
-    printf("\n>> Intersection f2 - f3");
+    double x_l, y_l, x_r, y_r, x_t, y_t, x_b, y_b;
+    printf("\nepsilon = %lf", epsilon);
+    // For f2 and f3 inresection:
+    // 2 roots in [-5, 0.0001] and [2; 6] 
+    printf("\n------------------------- Graphs Intersections -------------------------");
+    // Bottom:
     a = -.5;
     b = -0.00001;
-    x0 = root(intersect_f2_f3, a, b, epsilon); 
-    printf("\nIntersection f2 and f3 [%lf; %lf] ~ %lf", a, b, x0); 
-    printf("\nf2(x0) = %lf f3(x0) = %lf  ", f2(x0), f3(x0)); 
-
-
+    x_b = root(intersect_f2_f3, a, b, epsilon);
+    y_b = f2(x_b); 
+    printf("\n[1]Intersection f2 and f3 [%lf; %lf] ~ (%lf, %lf)\n", a, b, x_b, y_b); 
+   
+    // Right
     a = 2.;
     b = 6.;    
-    x0 = root(intersect_f2_f3, a, b, epsilon); 
-    printf("\nIntersection f2 and f3 [%lf; %lf] ~ %lf", a, b, x0); 
+    x_r = root(intersect_f2_f3, a, b, epsilon); 
+    y_r = f2(x_r);
+    printf("\n[2]Intersection f2 and f3 [%lf; %lf] ~ (%lf, %lf)\n", a, b, x_r, y_r); 
+   
 
+    // For f1 and f3 inresection:
+    // 2 roots in [-10, -0.0001] and [0.0001; 10] 
 
-    printf("\n>> Intersection f1 - f3");
+    // Left
     a = -10.;
     b = -0.00001;
-    x0 = root(intersect_f1_f3, a, b, epsilon); 
-    printf("\nIntersection f1 and f3 [%lf; %lf] ~ %lf", a, b, x0); 
+    x_l = root(intersect_f1_f3, a, b, epsilon);
+    y_l = f1(x_l);
+    printf("\n[1]Intersection f1 and f3 [%lf; %lf] ~ (%lf, %lf)\n", a, b, x_l, y_l); 
 
+    //Top
     a = 0.00001;
     b = 10.;    
-    x0 = root(intersect_f1_f3, a, b, epsilon); 
-    printf("\nIntersection f1 and f3 [%lf; %lf] ~ %lf", a, b, x0); 
-
- 
-
-
+    x_t = root(intersect_f1_f3, a, b, epsilon); 
+    y_t = f1(x_t);
+    printf("\n[2]Intersection f1 and f3 [%lf; %lf] ~ (%lf, %lf)\n", a, b, x_t, y_t);
+    double fig_s;
+    if (!calc_roots)
+    {
+        printf("\n------------------------- Figure Area -------------------------");
+        fig_s = 0.;
+        fig_s += integral(f1, x_l, x_t, epsilon);
+        //printf("\ni_1 = %lf", fig_s);
+        fig_s += integral(f3, x_t, x_r, epsilon);
+        //printf("\ni_2 = %lf", fig_s);
+        fig_s -= integral(f3, x_l, x_b, epsilon);
+        //printf("\ni_3 = %lf", fig_s);
+        fig_s -= integral(f2, x_b, x_r, epsilon);
+        printf("\nArea value = %lf", fig_s);
+    }
     
-    // // Input: lower limit, upper limit, and number of intervals
-    // printf("Enter lower limit of integration: ");
-    // scanf("%lf", &a);
-    // printf("Enter upper limit of integration: ");
-    // scanf("%lf", &b);
-    // printf("Enter epsilon (eps): ");
-    // scanf("%lf", &eps);
-
-    // // Compute the integral using the trapezoidal rule
-    // double result = integral(f, a, b, eps);
-    // double result_true = f_true(a, b);
-
-
-    // // Output the result
-    // printf("Approximate integral: %.6lf\n", result);
-    // printf("\nReal integral: %.6lf\n", result_true);
-
-    // return 0;
 }
