@@ -3,61 +3,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include "roots.h"
+#include "itrapez.h"
 
-/*
-int  sign_f(double x, double (*f)(double))
-{
-    return f(x) == 0 ? 0 : (f(x) < 0 ? -1: +1);
-}
-
-double root(double (*f)(double), double xl, double xr, double eps) 
-{
-    int stepcount = 0;
-    double xm;
-    while(fabs(xr - xl) > eps) 
-    { 
-        stepcount++;
-        xm=(xl + xr)/2; 
-        if(sign_f(xl, f) != sign_f(xm, f))
-            xr = xm;
-        else
-            xl = xm;
-    }
-    printf("\nSteps number: %d", stepcount);
-    return (xl + xr) / 2;
-}
-*/
-// Trapezoidal Rule function
-double trapezoidal_rule(double (*func)(double), double a, double b, int n) {
-    double h = (b - a) / n; // Step size
-    double sum = 0.5 * (func(a) + func(b)); // Initialize sum with the first and last terms
-
-    for (int i = 1; i < n; i++) {
-        double x = a + i * h;
-        sum += func(x);
-    }
-    return sum * h;
-}
-
-// Function to compute integral with accuracy epsilon
-double integral(double (*func)(double), double a, double b, double eps2) {
-    int n = 1; // Start with 1 interval
-    double prev_integral = trapezoidal_rule(func, a, b, n);
-    double current_integral;
-    while (1) {
-        n *= 2; // Double the number of intervals for better accuracy
-        current_integral = trapezoidal_rule(func, a, b, n);
-
-        // Check if the difference between successive integrals is less than epsilon
-        if (fabs(current_integral - prev_integral) < eps2) {
-            break;
-        }
-
-        prev_integral = current_integral; // Update previous integral
-    }
-
-    return current_integral;
-}
 
 double f(double x) {
     return sin(x); // Example: integral of sin(x)
@@ -109,19 +56,37 @@ void test()
     printf("\nTesting f(x) = sin(x)");
     printf("\nTest 1: Roots for sin(x) = 0\n");
     x0 = root(test_sin, a, b, epsilon); 
-    printf("Root sin(x) in range [%3lf; %3lf] = %lf\n", a, b, x0); 
+    printf("\nRoot sin(x) in range [%3lf; %3lf] = %lf\n", a, b, x0); 
     a = 0.;
     b = M_PI;
     printf("\nTest 2: Integral for sin(x) = 0\n");
     sigma = integral(test_sin, a, b, epsilon); 
-    printf("Integral sin(x) in range [%3lf; %3lf] = %lf\n", a, b, sigma); 
+    printf("\nIntegral sin(x) in range [%3lf; %3lf] = %lf\n", a, b, sigma); 
 }
 
 
 void help()
 {
-    printf ("Help ....\n");
-}
+    printf("\nNumerical integration application.\n");
+    printf("-----------------------------------------\n");
+    printf("Numerical integration is used to calculate a numerical approximation for the value S , \nthe area under the curves defined by:\n");
+    printf("f1(x) = 0.6 * x + 3\n");
+    printf("f2(x) = pow ((x - 2.), 3) - 1\n");
+    printf("f3(x) = 3/x\n");
+    printf("-----------------------------------------\n");
+    printf("\tUsage: integral [-h]  [-e <epsilon value>] [r] \n");
+    printf("\t\t-h \t Show this help.\n");
+    printf("\t\t-t \t Test.\n");
+    printf("\t\t-e \t Accuracy. Epsilon is a float value. Default value is 0.00001\n");
+    printf("\t\t-r \t Roots. Points of intersection of the functions plots.\n");
+
+    printf("\tExamples:\n");
+    printf("\t\tintegral -h\n");
+    printf("\t\tintegral -t\n");
+    printf("\t\tintegral -r -e 0.01\n");
+    printf("\t\tintegral -e 0.001\n");
+};
+
 
 int main(int argc, char *argv[])
  {
@@ -149,7 +114,8 @@ int main(int argc, char *argv[])
                 epsilon = (double)atof(optarg);
                 break;
             case '?': 
-                printf("\nUnknown option!");
+                printf("\nUnknown option!\n");
+                help();
                 return 1;
         }
     };
@@ -204,7 +170,7 @@ int main(int argc, char *argv[])
         fig_s -= integral(f3, x_l, x_b, epsilon);
         //printf("\ni_3 = %lf", fig_s);
         fig_s -= integral(f2, x_b, x_r, epsilon);
-        printf("\nArea value = %lf", fig_s);
+        printf("\nArea value = %lf\n\n", fig_s);
     }
     
 }
